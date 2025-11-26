@@ -1,30 +1,46 @@
-#!/usr/bin.env groovy
+#!/usr/bin/env groovy
 
-pipeline {   
+library identifier: 'Jenkins-Shared-Library-Master@master', retriever: modernSCM(
+    [$class: 'GitSCMSource',
+    remote: 'https://github.com/OkomaNdu/Jenkins-Shared-Library-Master.git',
+    credentialsID: 'gitlab-credentials'
+    ]
+)
+pipeline {
     agent any
+    tools {
+        maven 'Maven-3.9'
+    }
+    environment {
+        IMAGE_NAME = 'ndubuisip/demo-app:java-maven-1.0'
+    }
     stages {
-        stage("test") {
+        stage('build app') {
+            steps {
+                echo 'building application jar...'
+                buildJar()
+            }
+        }
+        stage('build image') {
             steps {
                 script {
-                    echo "Testing the application..."
-
+                    echo 'building the docker image...'
+                    buildImage(env.IMAGE_NAME)
+                    dockerLogin()
+                    dockerPush(env.IMAGE_NAME)
                 }
             }
         }
-        stage("build") {
-            steps {
-                script {
-                    echo "Building the application..."
-                }
-            }
-        }
-
         stage("deploy") {
             steps {
                 script {
-                    echo "Deploying the application..."
+                    echo 'deploying docker image to EC2...'
+                    def dockerCmd = "docker run -p 8080:8080 -d ${IMAGE_NAME}"
+                    sshagent(['ec2-server-key']) {
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@16.52.82.16 ${dockerCmd}"
+                    }
                 }
             }
-        }               
+        }
     }
-} 
+}
