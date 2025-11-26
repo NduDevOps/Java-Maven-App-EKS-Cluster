@@ -24,11 +24,10 @@ pipeline {
                        '''
                     def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
                     def version = matcher[0][1]
-                     env.IMAGE_NAME = "${version}-${BUILD_NUMBER}"
+                    env.IMAGE_NAME = "ndubuisip/demo-app:${version}-${BUILD_NUMBER}"
                 }
             }
         }
-
         stage('build app') {
             steps {
               echo 'building application jar...'
@@ -50,7 +49,7 @@ pipeline {
                 script {
                     echo 'deploying docker image to EC2...'
 
-                    def shellCmd = "bash ./server-cmds.sh ${IMAGE_NAME}"
+                    def shellCmd = "bash ./server-cmds.sh ${env.IMAGE_NAME}"
                     def ec2Instance = "ec2-user@16.52.82.16"
                     sshagent(['EC2-Server-Key']) {
                         sh "scp server-cmds.sh ${ec2Instance}:/home/ec2-user"
