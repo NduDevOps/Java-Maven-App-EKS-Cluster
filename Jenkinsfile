@@ -11,26 +11,28 @@ pipeline {
     tools {
         maven 'maven-3.9'
     }
-    stage('increment version') {
-        steps {
-            script {
-               echo 'incrementing app version....'
-               sh '''
-                   mvn build-helper:parse-version \
-                   versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.nextIncrementalVersion} \
-                   versions:commit
-                   '''
-               def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
-               def version = matcher[0][1]
-               env.IMAGE_NAME = "${version}-${BUILD_NUMBER}"
+    stages {
+
+        stage('increment version') {
+            steps {
+                script {
+                    echo 'incrementing app version....'
+                    sh '''
+                         mvn build-helper:parse-version \
+                         versions:set -DnewVersion=\\${parsedVersion.majorVersion}.\\${parsedVersion.minorVersion}.\\${parsedVersion.nextIncrementalVersion} \
+                         versions:commit
+                       '''
+                    def matcher = readFile('pom.xml') =~ '<version>(.+)</version>'
+                    def version = matcher[0][1]
+                     env.IMAGE_NAME = "${version}-${BUILD_NUMBER}"
+                }
             }
         }
-    }
-    stages {
+
         stage('build app') {
             steps {
-                echo 'building application jar...'
-                buildJar()
+              echo 'building application jar...'
+              buildJar()
             }
         }
         stage('build image') {
@@ -58,7 +60,7 @@ pipeline {
                 }
             }
         }
-        stage('commit version update') {
+        stage('commit version update'){
             steps {
                 script {
                      withCredentials([usernamePassword(credentialsId: 'GitHub-Credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
