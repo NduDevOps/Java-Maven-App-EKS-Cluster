@@ -1,10 +1,12 @@
 #!/usr/bin/env groovy
 
-library identifier: 'Jenkins-Shared-Library-Master@master', retriever: modernSCM(
-    [$class: 'GitSCMSource',
-    remote: 'https://github.com/OkomaNdu/Jenkins-Shared-Library-Master.git',
-    credentialsID: 'GitHub-Credentials'
-    ]
+library(
+     identifier: 'Jenkins-Shared-Library-Master@master',
+     retriever: modernSCM([
+          $class: 'GitSCMSource',
+         remote: 'https://github.com/OkomaNdu/Jenkins-Shared-Library-Master.git',
+         credentialsId: 'GitHub-Credentials'
+    ])
 )
 pipeline {
     agent any
@@ -63,6 +65,8 @@ pipeline {
             steps {
                 script {
                      withCredentials([usernamePassword(credentialsId: 'GitHub-Credentials', passwordVariable: 'PASS', usernameVariable: 'USER')]){
+                        git config user.email "ndu2okoma@gmail.com"
+                        git config user.name "OkomaNdu"
                         sh 'git remote set-url origin https://$USER:$PASS@github.com/OkomaNdu/Java-Maven-App-Multi-Branch.git'
                         sh 'git add .'
                         sh 'git commit -m "ci: version bump"'
