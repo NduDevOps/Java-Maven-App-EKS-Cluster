@@ -7,7 +7,6 @@ pipeline {
             steps {
                 script {
                     echo "Testing the application..."
-
                 }
             }
         }
@@ -18,16 +17,14 @@ pipeline {
                 }
             }
         }
-
         stage("deploy") {
             steps {
                 script {
                     def dockerCmd = 'docker run -p 3080:3080 -d ndubuisip/demo-app:1.0'
                     sshagent(['EC2-Server-Key']) {
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@16.52.82.16 ${dockerCmd}"
+                        sh "ssh -o StrictHostKeyChecking=no ec2-user@35.182.253.151 ${dockerCmd}"
                     }
                 }
             }
-        }               
+        }
     }
-} 
