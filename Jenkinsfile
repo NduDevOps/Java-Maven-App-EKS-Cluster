@@ -1,29 +1,24 @@
-#!/usr/bin.env groovy
-
-pipeline {   
+pipeline {
     agent any
     stages {
         stage("test") {
             steps {
-                script {
-                    echo "Testing the application..."
-                }
+                 script{
+                   echo "Testing the application..."
+                 }
             }
         }
         stage("build") {
             steps {
-                script {
-                    echo "Building the application..."
-                }
+               script {
+                   echo "Building the application..."
+               }
             }
         }
         stage("deploy") {
             steps {
                 script {
-                    def dockerCmd = 'docker run -p 3080:3080 -d ndubuisip/demo-app:1.0'
-                    sshagent(['EC2-Server-Key']) {
-                        sh "ssh -o StrictHostKeyChecking=no ec2-user@35.182.253.151 ${dockerCmd}"
-                    }
+                   echo "Deploying the application..."
                 }
             }
         }
