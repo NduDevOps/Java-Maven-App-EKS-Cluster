@@ -37,7 +37,7 @@ pipeline {
             steps {
                  script{
                       echo "building the docker image..."
-                      withCredentials([usernamePassword(credentialsId: 'docker-hub-repo', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
+                      withCredentials([usernamePassword(credentialsId: 'ecr-credential', passwordVariable: 'PASS', usernameVariable: 'USER')]) {
                              sh "docker build -t ndubuisip/demo-app:${IMAGE_NAME} ."
                              sh 'echo $PASS | docker login -u $USER --password-stdin'
                              sh "docker push ndubuisip/demo-app:${IMAGE_NAME}"
@@ -48,7 +48,7 @@ pipeline {
         stage("deploy") {
             environment {
                 AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
-                AWS_SECRET_ACCESS_KEY = credentials('jenkins_aws_secret_access_key')
+                AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
                  APP_NAME = 'java-maven-app'
             }
             steps {
