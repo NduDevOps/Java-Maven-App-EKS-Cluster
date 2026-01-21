@@ -1,45 +1,31 @@
 #!/usr/bin/env groovy
 
-library identifier: 'Jenkins-Shared-Library@master', retriever: modernSCM(
-        [$class: 'GitSCMSource',
-        remote: 'https://github.com/OkomaNdu/Jenkins-Shared-Library.git',
-        credentialsId: 'GitHub-Credentials'])
-
-def gv
-
-pipeline  {
+pipeline {
     agent any
-    tools {
-         maven 'maven-3.9'
-    }
     stages {
-        stage("init") {
+        stage('build app') {
             steps {
-                script{
-                    gv = load "script.groovy"
-                }
-            }
-        }
-        stage("build jar") {
-            steps {
-                 script{
-                     buildJar()
-                 }
-            }
-        }
-        stage("build and push image") {
-            steps {
-               script{
-                   buildImage 'ndubuisip/demo-app:jma-3.0'
-                   dockerLogin()
-                   dockerPush 'ndubuisip/demo-app:jma-3.0'
+               script {
+                   echo "building the application..."
                }
             }
         }
-        stage("deploy") {
+        stage('build image') {
             steps {
-                script{
-                   gv.deployApp()
+                script {
+                    echo "building the docker image..."
+                }
+            }
+        }
+        stage('deploy') {
+            environment {
+                AWS_ACCESS_KEY_ID = credentials('jenkins_aws_access_key_id')
+                AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws_secret_access_key')
+            }
+            steps {
+                script {
+                   echo 'deploying docker image...'
+                   sh 'kubectl create deployment nginx-deployment --image=nginx'
                 }
             }
         }
